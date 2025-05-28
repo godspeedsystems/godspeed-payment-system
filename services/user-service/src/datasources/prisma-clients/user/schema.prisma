@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./prisma-clients/user"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum UserRole {
+  MERCHANT
+  DEVELOPER
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  status       UserStatus @default(PENDING)
+  role         UserRole[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  organizations Organization[] // one-to-many relation: one user can have many organizations
+  kycDocuments  KYCDocument[]
+
+  @@map("users")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String // foreign key to User
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id]) // relation field back to User
+
+  @@map("organizations")
+}
+
+model KYCDocument {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  url        String
+  verified   Boolean  @default(false)
+  uploadedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("kyc_documents")
+}

@@ -42,6 +42,7 @@
 		"@godspeedsystems/core": "^2.5.4",
 		"@godspeedsystems/plugins-axios-as-datasource": "^1.0.6",
 		"@godspeedsystems/plugins-express-as-http": "^1.0.25",
+		"@godspeedsystems/plugins-prisma-as-datastore": "^2.0.7",
 		"@prisma/client": "^6.8.2",
 		"config": "^4.0.0",
 		"dotenv": "^16.5.0",
