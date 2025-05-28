@@ -46,3 +46,5 @@ http.post./register:
       description: Invalid input
     409:
       description: Email already exists
+    520:
+      description: Unknown Error
