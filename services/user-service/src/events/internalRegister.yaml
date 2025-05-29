@@ -1,5 +1,5 @@
-http.post./register:
-  fn: registerUser
+http.post./user:
+  fn: registerUserToDB
   authn: false
   body:
     required: true
@@ -9,7 +9,7 @@ http.post./register:
           type: object
           required:
             - email
-            - password
+            - passwordHash
             - role
           properties:
             email:
@@ -27,7 +27,7 @@ http.post./register:
                   - DEVELOPER
   responses:
     201:
-      description: User registered successfully
+      description: User saved to database successfully
       content:
         application/json:
           schema:
@@ -42,8 +42,6 @@ http.post./register:
               createdAt:
                 type: string
                 format: date-time
-              passwordHash:
-                type: string
     400:
       description: Invalid input
     409:
