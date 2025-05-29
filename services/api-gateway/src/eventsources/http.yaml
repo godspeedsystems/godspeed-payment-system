@@ -22,7 +22,7 @@ docs:
   servers:
     - url: 'http://localhost:3000'
       description: Public API server
-    - url: 'http://localhost:3001'
+    - url: 'http://localhost:4000'
       description: Internal API server
 
 request_body_limit: 20000   # set maximum size of the request body in bytes
