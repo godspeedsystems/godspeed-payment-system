@@ -23,18 +23,24 @@
 		"clean:default": "rm -rf dist",
 		"prisma-db-push": "for i in src/datasources/*.prisma; do npx --yes prisma db push --schema $i; done;",
 		"prisma-generate": "for i in src/datasources/*.prisma; do npx --yes prisma generate --schema $i; done;",
-		"serve": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && nodemon --watch src --watch config --watch mappings -e ts,js,yaml,json,.env --exec \"npm run build && npm run preview\""
+		"serve": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && nodemon --watch src --watch config --watch mappings -e ts,js,yaml,json,.env --exec \"npm run build && npm run preview\"",
+		"test": "mocha --require ./node_modules/ts-node/register test/**/*.test.ts"
 	},
-	"author": "",
-	"license": "ISC",
 	"devDependencies": {
 		"@swc/cli": "^0.7.7",
 		"@swc/core": "^1.11.24",
+		"@types/chai": "^5.2.2",
 		"@types/config": "^3.3.5",
+		"@types/jest": "^29.5.14",
 		"@types/node": "^22.15.19",
+		"@types/sinon": "^17.0.4",
+		"chai": "^5.1.0",
 		"copyfiles": "^2.4.1",
+		"jest": "^29.7.0",
 		"nodemon": "^3.1.10",
 		"run-script-os": "^1.1.6",
+		"sinon": "^17.0.1",
+		"ts-jest": "^29.3.4",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.8.3"
 	},
