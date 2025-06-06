@@ -1,26 +1,24 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const core = require('@godspeedsystems/core');
-const gsAppExport = require('../../dist/index.js');
-
 const { GSStatus } = core;
-const gsApp = gsAppExport.default || gsAppExport;
 
-const responseFuncInitializer = gsApp._loadFunctions();
+const appPromise = require('../../dist/index.js');
+let gsApp;
 
-console.log("Godspeed Functions initialized:", responseFuncInitializer);
-// console.log("List of Workflows:", gsApp);
+before(async () => {
+  gsApp = await appPromise.default || await appPromise;
+});
 
 describe('registerUserToDB', () => {
-  let args;
   let findUniqueStub;
   let createStub;
 
   beforeEach(() => {
-    args = {};
     findUniqueStub = sinon.stub();
     createStub = sinon.stub();
 
+    // Re-inject mocks into Godspeed's context before each test
     gsApp.datasources = {
       schema: {
         client: {
@@ -34,7 +32,14 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if email is missing', async () => {
-    const result = await gsApp.executeWorkflow("registerUserToDB.js", args);
+    const args = {
+      __event: {
+        data: {
+          body: {}
+        }
+      }
+    };
+    const result = await gsApp.executeWorkflow("registerUserToDB", args);
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
@@ -43,7 +48,13 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if passwordHash is missing', async () => {
-    gsApp.inputs = { data: { body: { email: 'test@example.com' } } };
+    const args = {
+      __event: {
+        data: {
+          body: { email: 'test@example.com' }
+        }
+      }
+    };
     const result = await gsApp.executeWorkflow("registerUserToDB", args);
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
@@ -53,8 +64,14 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if role is missing or empty', async () => {
-    gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password' } } };
-    const result = await gsApp.executeWorkflow("functions/registerUserToDB", args);
+    const args = {
+      __event: {
+        data: {
+          body: { email: 'test@example.com', passwordHash: 'password' }
+        }
+      }
+    };
+    const result = await gsApp.executeWorkflow("registerUserToDB", args);
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
@@ -63,7 +80,14 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if user already exists', async () => {
-    gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
+    const args = {
+      __event: {
+        data: {
+          body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] }
+        }
+      }
+    };
+
     findUniqueStub.resolves({ email: 'test@example.com' });
 
     const result = await gsApp.executeWorkflow("registerUserToDB", args);
@@ -75,7 +99,14 @@ describe('registerUserToDB', () => {
   });
 
   it('should create a user successfully', async () => {
-    gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
+    const args = {
+      __event: {
+        data: {
+          body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] }
+        }
+      }
+    };
+
     findUniqueStub.resolves(null);
     createStub.resolves({ id: '123', email: 'test@example.com', role: ['user'], status: 'active' });
 
@@ -89,3 +120,101 @@ describe('registerUserToDB', () => {
     expect(result.data.role).to.deep.equal(['user']);
   });
 });
+
+// const { expect } = require('chai');
+// const sinon = require('sinon');
+// const core = require('@godspeedsystems/core');
+// const { GSStatus } = core;
+
+// const appPromise = require('../../dist/index.js');
+// let gsApp;
+
+// async function printGSApp() {
+//   gsApp = await appPromise.default || await appPromise;
+//   console.log("List of Workflows:", gsApp);
+// }
+
+// printGSApp().catch(console.error);
+
+// before(async () => {
+//   gsApp = await appPromise.default || await appPromise;
+// });
+
+// describe('registerUserToDB', () => {
+//   let args;
+//   let findUniqueStub;
+//   let createStub;
+
+//   beforeEach(() => {
+//     args = {};
+//     findUniqueStub = sinon.stub();
+//     createStub = sinon.stub();
+
+//     // gsApp.datasources = {
+//     //   schema: {
+//     //     client: {
+//     //       user: {
+//     //         findUnique: findUniqueStub,
+//     //         create: createStub,
+//     //       },
+//     //     },
+//     //   },
+//     // };
+//   });
+
+//   it('should return an error if email is missing', async () => {
+//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     expect(result).to.be.instanceOf(GSStatus);
+//     expect(result.success).to.be.false;
+//     expect(result.code).to.equal(400);
+//     expect(result.message).to.equal('Missing or invalid required fields');
+//     expect(result.data.missing).to.deep.equal(['email', 'passwordHash', 'role']);
+//   });
+
+//   it('should return an error if passwordHash is missing', async () => {
+//     gsApp.inputs = { data: { body: { email: 'test@example.com' } } };
+//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     expect(result).to.be.instanceOf(GSStatus);
+//     expect(result.success).to.be.false;
+//     expect(result.code).to.equal(400);
+//     expect(result.message).to.equal('Missing or invalid required fields');
+//     expect(result.data.missing).to.deep.equal(['passwordHash', 'role']);
+//   });
+
+//   it('should return an error if role is missing or empty', async () => {
+//     gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password' } } };
+//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     expect(result).to.be.instanceOf(GSStatus);
+//     expect(result.success).to.be.false;
+//     expect(result.code).to.equal(400);
+//     expect(result.message).to.equal('Missing or invalid required fields');
+//     expect(result.data.missing).to.deep.equal(['role']);
+//   });
+
+//   it('should return an error if user already exists', async () => {
+//     gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
+//     findUniqueStub.resolves({ email: 'test@example.com' });
+
+//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     expect(result).to.be.instanceOf(GSStatus);
+//     expect(result.success).to.be.false;
+//     expect(result.code).to.equal(409);
+//     expect(result.message).to.equal('User already exists');
+//     expect(result.data.email).to.equal('test@example.com');
+//   });
+
+//   it('should create a user successfully', async () => {
+//     gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
+//     findUniqueStub.resolves(null);
+//     createStub.resolves({ id: '123', email: 'test@example.com', role: ['user'], status: 'active' });
+
+//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     expect(result).to.be.instanceOf(GSStatus);
+//     expect(result.success).to.be.true;
+//     expect(result.code).to.equal(201);
+//     expect(result.message).to.equal('User created successfully');
+//     expect(result.data.userId).to.equal('123');
+//     expect(result.data.email).to.equal('test@example.com');
+//     expect(result.data.role).to.deep.equal(['user']);
+//   });
+// });

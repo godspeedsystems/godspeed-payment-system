@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const core = require('@godspeedsystems/core');
-const { GSStatus } = core;
+const { GSStatus, GSContext, GSCloudEvent, logger, GSActor } = core;
 
 const appPromise = require('../../dist/index.js');
 let gsApp;
@@ -11,35 +11,36 @@ before(async () => {
 });
 
 describe('registerUserToDB', () => {
+  let args;
   let findUniqueStub;
   let createStub;
 
   beforeEach(() => {
+    args = {};
     findUniqueStub = sinon.stub();
     createStub = sinon.stub();
 
-    // Re-inject mocks into Godspeed's context before each test
     gsApp.datasources = {
       schema: {
         client: {
           user: {
             findUnique: findUniqueStub,
-            create: createStub,
-          },
-        },
-      },
+            create: createStub
+          }
+        }
+      }
     };
   });
 
   it('should return an error if email is missing', async () => {
-    const args = {
-      __event: {
-        data: {
-          body: {}
-        }
-      }
-    };
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
+    const data = { body: {} };
+    const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+    const childLogger = logger.child(gsApp.getCommonAttrs(event));
+    const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
+
+    const workflow = gsApp.workflows["registerUserToDB"];
+    const result = await workflow(ctx, args);
+
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
@@ -48,14 +49,14 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if passwordHash is missing', async () => {
-    const args = {
-      __event: {
-        data: {
-          body: { email: 'test@example.com' }
-        }
-      }
-    };
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
+    const data = { body: { email: 'test@example.com' } };
+    const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+    const childLogger = logger.child(gsApp.getCommonAttrs(event));
+    const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
+
+    const workflow = gsApp.workflows["registerUserToDB"];
+    const result = await workflow(ctx, args);
+
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
@@ -64,14 +65,14 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if role is missing or empty', async () => {
-    const args = {
-      __event: {
-        data: {
-          body: { email: 'test@example.com', passwordHash: 'password' }
-        }
-      }
-    };
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
+    const data = { body: { email: 'test@example.com', passwordHash: 'password' } };
+    const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+    const childLogger = logger.child(gsApp.getCommonAttrs(event));
+    const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
+
+    const workflow = gsApp.workflows["registerUserToDB"];
+    const result = await workflow(ctx, args);
+
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
@@ -80,17 +81,22 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if user already exists', async () => {
-    const args = {
-      __event: {
-        data: {
-          body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] }
-        }
+    const data = {
+      body: {
+        email: 'test@example.com',
+        passwordHash: 'password',
+        role: ['user']
       }
     };
+    const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+    const childLogger = logger.child(gsApp.getCommonAttrs(event));
+    const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
 
     findUniqueStub.resolves({ email: 'test@example.com' });
 
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
+    const workflow = gsApp.workflows["registerUserToDB"];
+    const result = await workflow(ctx, args);
+
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(409);
@@ -99,18 +105,28 @@ describe('registerUserToDB', () => {
   });
 
   it('should create a user successfully', async () => {
-    const args = {
-      __event: {
-        data: {
-          body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] }
-        }
+    const data = {
+      body: {
+        email: 'test@example.com',
+        passwordHash: 'password',
+        role: ['user']
       }
     };
+    const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+    const childLogger = logger.child(gsApp.getCommonAttrs(event));
+    const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
 
     findUniqueStub.resolves(null);
-    createStub.resolves({ id: '123', email: 'test@example.com', role: ['user'], status: 'active' });
+    createStub.resolves({
+      id: '123',
+      email: 'test@example.com',
+      role: ['user'],
+      status: 'active'
+    });
 
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
+    const workflow = gsApp.workflows["registerUserToDB"];
+    const result = await workflow(ctx, args);
+
     expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.true;
     expect(result.code).to.equal(201);
@@ -124,7 +140,7 @@ describe('registerUserToDB', () => {
 // const { expect } = require('chai');
 // const sinon = require('sinon');
 // const core = require('@godspeedsystems/core');
-// const { GSStatus } = core;
+// const { GSStatus, GSContext, GSCloudEvent, logger, GSActor } = core;
 
 // const appPromise = require('../../dist/index.js');
 // let gsApp;
@@ -149,21 +165,16 @@ describe('registerUserToDB', () => {
 //     args = {};
 //     findUniqueStub = sinon.stub();
 //     createStub = sinon.stub();
-
-//     // gsApp.datasources = {
-//     //   schema: {
-//     //     client: {
-//     //       user: {
-//     //         findUnique: findUniqueStub,
-//     //         create: createStub,
-//     //       },
-//     //     },
-//     //   },
-//     // };
 //   });
 
 //   it('should return an error if email is missing', async () => {
-//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     const data = { body: { } };
+//     // const data = { body: { email: 'test@example.com' } };
+//     const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+//     const childLogger = logger.child(gsApp.getCommonAttrs(event));
+//     const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
+//     const workflow = gsApp.workflows["registerUserToDB"];
+//     const result = await workflow(ctx, args)
 //     expect(result).to.be.instanceOf(GSStatus);
 //     expect(result.success).to.be.false;
 //     expect(result.code).to.equal(400);
@@ -172,8 +183,12 @@ describe('registerUserToDB', () => {
 //   });
 
 //   it('should return an error if passwordHash is missing', async () => {
-//     gsApp.inputs = { data: { body: { email: 'test@example.com' } } };
-//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     const data = { body: { email: 'test@example.com' } };
+//     const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+//     const childLogger = logger.child(gsApp.getCommonAttrs(event));
+//     const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
+//     const workflow = gsApp.workflows["registerUserToDB"];
+//     const result = await workflow(ctx, args)
 //     expect(result).to.be.instanceOf(GSStatus);
 //     expect(result.success).to.be.false;
 //     expect(result.code).to.equal(400);
@@ -182,8 +197,12 @@ describe('registerUserToDB', () => {
 //   });
 
 //   it('should return an error if role is missing or empty', async () => {
-//     gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password' } } };
-//     const result = await gsApp.executeWorkflow("registerUserToDB", args);
+//     const data = { body: { email: 'test@example.com', passwordHash: 'password' } };
+//     const event = new GSCloudEvent("", "", new Date(), "", "", data, "REST", new GSActor(), {});
+//     const childLogger = logger.child(gsApp.getCommonAttrs(event));
+//     const ctx = new GSContext(gsApp.config, gsApp.datasources, event, gsApp.mappings, gsApp.nativeFunctions, gsApp.plugins, logger, childLogger);
+//     const workflow = gsApp.workflows["registerUserToDB"];
+//     const result = await workflow(ctx, args)
 //     expect(result).to.be.instanceOf(GSStatus);
 //     expect(result.success).to.be.false;
 //     expect(result.code).to.equal(400);
