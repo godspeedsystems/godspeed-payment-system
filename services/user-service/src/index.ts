@@ -11,12 +11,20 @@ try {
 import Godspeed from "@godspeedsystems/core";
 
 // create a godspeed
-const gsApp = new Godspeed();
+// const gsApp = new Godspeed();
 
-// initilize the Godspeed App
-// this is responsible to load all kind of entities
-gsApp.initialize();
+// // initilize the Godspeed App
+// // this is responsible to load all kind of entities
+// gsApp.initialize();
 
-// console.log(gsApp);
+// export default gsApp;
 
-export default gsApp;
+async function bootstrap() {
+  const gsApp = new Godspeed();
+  await gsApp.initialize();
+  return gsApp;
+}
+
+// ✅ Export a Promise (resolves to initialized app)
+const appPromise = bootstrap();
+export default appPromise;
