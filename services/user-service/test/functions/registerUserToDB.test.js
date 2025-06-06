@@ -1,20 +1,27 @@
-import { expect } from 'chai';
-import { GSStatus } from '@godspeedsystems/core';
-import sinon from 'sinon';
-import gsApp from '../../dist/index.js';
+const { expect } = require('chai');
+const sinon = require('sinon');
+const core = require('@godspeedsystems/core');
+const gsAppExport = require('../../dist/index.js');
+
+const { GSStatus } = core;
+const gsApp = gsAppExport.default || gsAppExport;
+
+const responseFuncInitializer = gsApp._loadFunctions();
+
+console.log("Godspeed Functions initialized:", responseFuncInitializer);
+// console.log("List of Workflows:", gsApp);
 
 describe('registerUserToDB', () => {
-  let args: any;
-  let findUniqueStub: sinon.SinonStub;
-  let createStub: sinon.SinonStub;
+  let args;
+  let findUniqueStub;
+  let createStub;
 
   beforeEach(() => {
     args = {};
     findUniqueStub = sinon.stub();
     createStub = sinon.stub();
 
-    // Mock the datasources directly on gsApp
-    (gsApp as any).datasources = {
+    gsApp.datasources = {
       schema: {
         client: {
           user: {
@@ -27,8 +34,8 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if email is missing', async () => {
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
-    expect(result).to.be.an.instanceOf(GSStatus);
+    const result = await gsApp.executeWorkflow("registerUserToDB.js", args);
+    expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
     expect(result.message).to.equal('Missing or invalid required fields');
@@ -36,9 +43,9 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if passwordHash is missing', async () => {
-    (gsApp as any).inputs = { data: { body: { email: 'test@example.com' } } };
+    gsApp.inputs = { data: { body: { email: 'test@example.com' } } };
     const result = await gsApp.executeWorkflow("registerUserToDB", args);
-    expect(result).to.be.an.instanceOf(GSStatus);
+    expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
     expect(result.message).to.equal('Missing or invalid required fields');
@@ -46,9 +53,9 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if role is missing or empty', async () => {
-    (gsApp as any).inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password' } } };
-    const result = await gsApp.executeWorkflow("registerUserToDB", args);
-    expect(result).to.be.an.instanceOf(GSStatus);
+    gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password' } } };
+    const result = await gsApp.executeWorkflow("functions/registerUserToDB", args);
+    expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(400);
     expect(result.message).to.equal('Missing or invalid required fields');
@@ -56,10 +63,11 @@ describe('registerUserToDB', () => {
   });
 
   it('should return an error if user already exists', async () => {
-    (gsApp as any).inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
+    gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
     findUniqueStub.resolves({ email: 'test@example.com' });
+
     const result = await gsApp.executeWorkflow("registerUserToDB", args);
-    expect(result).to.be.an.instanceOf(GSStatus);
+    expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.false;
     expect(result.code).to.equal(409);
     expect(result.message).to.equal('User already exists');
@@ -67,11 +75,12 @@ describe('registerUserToDB', () => {
   });
 
   it('should create a user successfully', async () => {
-    (gsApp as any).inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
+    gsApp.inputs = { data: { body: { email: 'test@example.com', passwordHash: 'password', role: ['user'] } } };
     findUniqueStub.resolves(null);
     createStub.resolves({ id: '123', email: 'test@example.com', role: ['user'], status: 'active' });
+
     const result = await gsApp.executeWorkflow("registerUserToDB", args);
-    expect(result).to.be.an.instanceOf(GSStatus);
+    expect(result).to.be.instanceOf(GSStatus);
     expect(result.success).to.be.true;
     expect(result.code).to.equal(201);
     expect(result.message).to.equal('User created successfully');

@@ -17,6 +17,4 @@ const gsApp = new Godspeed();
 // this is responsible to load all kind of entities
 gsApp.initialize();
 
-// console.log(gsApp);
-
 export default gsApp;
