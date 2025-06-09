@@ -25,7 +25,7 @@
 		"prisma-generate": "for i in src/datasources/*.prisma; do npx --yes prisma generate --schema $i; done;",
 		"serve": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && nodemon --watch src --watch config --watch mappings -e ts,js,yaml,json,.env --exec \"npm run build && npm run preview\"",
 		"build:test": "tsc -p tsconfig.test.json",
-		"test": "npm run build:test && mocha dist/test/**/*.test.js",
+		"test": "npm run build:test && mocha test/dist/**/*.test.js",
 		"test:js": "mocha test/**/*.test.js"
 	},
 	"devDependencies": {
