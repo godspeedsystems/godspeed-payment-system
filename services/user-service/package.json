@@ -1,7 +1,6 @@
 {
 	"name": "user-service",
 	"version": "1.1.0",
-	
 	"description": "My first godspeed project.",
 	"main": "dist/index.js",
 	"scripts": {
@@ -25,9 +24,9 @@
 		"prisma-db-push": "for i in src/datasources/*.prisma; do npx --yes prisma db push --schema $i; done;",
 		"prisma-generate": "for i in src/datasources/*.prisma; do npx --yes prisma generate --schema $i; done;",
 		"serve": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && nodemon --watch src --watch config --watch mappings -e ts,js,yaml,json,.env --exec \"npm run build && npm run preview\"",
-		"test": "mocha --require ./node_modules/ts-node/register test/**/*.test.ts",
+		"build:test": "tsc -p tsconfig.test.json",
+		"test": "npm run build:test && mocha dist/test/**/*.test.js",
 		"test:js": "mocha test/**/*.test.js"
-
 	},
 	"devDependencies": {
 		"@swc/cli": "^0.7.7",
@@ -35,6 +34,7 @@
 		"@types/chai": "^5.2.2",
 		"@types/config": "^3.3.5",
 		"@types/jest": "^29.5.14",
+		"@types/mocha": "^10.0.10",
 		"@types/node": "^22.15.19",
 		"@types/sinon": "^17.0.4",
 		"chai": "^5.1.0",

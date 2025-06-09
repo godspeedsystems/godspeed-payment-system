@@ -1,21 +1,17 @@
 {
-	"compilerOptions": {
-		"target": "es6",
-		"module": "commonjs",
-		"outDir": "./dist",
-		"rootDir": "./src",
-		"strict": true,
-		"moduleResolution": "node",
-		"sourceMap": true,
-		"skipLibCheck": true,
-		"esModuleInterop": true
-	},
-	"include": [
-		"src/**/*",
-		"test/**/*"
-	],
-	"exclude": [
-		"./node_modules"
-	],
-	"name": "user-service"
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "types": ["node"],
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "test", "dist"],
+  "name": "user-service"
 }
