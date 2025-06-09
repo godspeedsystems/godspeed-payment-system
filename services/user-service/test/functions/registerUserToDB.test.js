@@ -4,6 +4,7 @@ const core = require('@godspeedsystems/core');
 const { GSStatus, GSContext, GSCloudEvent, logger, GSActor } = core;
 
 const appPromise = require('../../dist/index.js');
+
 let gsApp;
 
 before(async () => {

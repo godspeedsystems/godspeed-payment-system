@@ -2,10 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist/test",
-    "rootDir": "test",
+    "rootDir": ".",              // ← This is the fix
     "noEmit": false,
-    "types": ["mocha", "node"]
+    "types": ["mocha", "node"],
+    "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["test/**/*", "test/types/**/*"],
-  "exclude": ["node_modules", "dist", "src"]
+  "include": ["test/**/*", "src/**/*"]
 }

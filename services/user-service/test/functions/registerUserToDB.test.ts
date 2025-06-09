@@ -8,13 +8,25 @@ import {
   GSActor
 } from '@godspeedsystems/core';
 
-import appPromise from '../../dist/index.js'
+import appPromise from '../../src/index'
 
 let gsApp: any;
 
-before(async () => {
-  gsApp = (await appPromise.default) || (await appPromise);
+before(function () {
+  this.timeout(10000);
+  return appPromise.then(app => {
+    gsApp = app;
+  }).catch(err => {
+    console.error('App failed to start:', err);
+    throw err;
+  });
 });
+
+// before(async () => {
+//   // gsApp = (await appPromise.default) || (await appPromise);
+//   this.timeout(10000); // 10 seconds
+//   gsApp = await appPromise;
+// });
 
 describe('registerUserToDB', () => {
   let args: Record<string, unknown>;
