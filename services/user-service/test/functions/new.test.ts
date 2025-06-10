@@ -6,7 +6,7 @@ import { makeContext } from '../helpers/makeContext';
 
 import getGSApp from '../hooks/globalSetup';
 
-describe('registerUserToDB', () => {
+describe('new', () => {
   let gsApp: any;
   let args: Record<string, unknown>;
   let findUniqueStub: SinonStub;
