@@ -2,10 +2,10 @@
 type: axios
 base_url: https://httpbin.org # the base url of the api client
 curlifiedLogs: true #will print the curl requests of each API hit. Useful for debugging
-authn: # how to authenticate to this datasource
-  fn: my_bank_api.auth_workflow # the token refresh function. It returns the headers to be set for the API call
-  refreshOn: # if not specified datasource token is refreshed on 401 code by default
-    statusCode: [401, 403]
+#authn: # how to authenticate to this datasource
+#  fn: my_bank_api.auth_workflow # the token refresh function. It returns the headers to be set for the API call
+#  refreshOn: # if not specified datasource token is refreshed on 401 code by default
+#    statusCode: [401, 403]
 
 retry: #default retry logic on all API calls. Can be overriden at the task level when calling the API
   when:

@@ -1,34 +1,51 @@
-1. Test Objectives:
-   - Ensure all user registration flows are working correctly.
+# Test Strategy Document
 
-2. Testing Scope:
-   - Specifies what will and will not be tested.
-   - List all functions to be tested.
-     - Note: Currently, only the following can be tested:
-       - Utility functions (no Godspeed init required)
-       - Workflows without mocking (integration tests, Godspeed init required)
-       - Complex workflows (Godspeed init required)
-   - Functions to be tested:
-     - registerUserToDB
+## 1. Objective
+Ensure core user registration and data persistence functionality is working correctly.
 
-3. Test Coverage:
-   - Define the desired test coverage percentage (e.g., 80%).
-   - Desired test coverage: 80%
+## 2. Testing Framework: Mocha + Chai
 
-4. Tools for Testing:
-   - Specify which testing frameworks and tools will be used for:
-     - Unit tests
-     - Integration tests
-     - E2E tests (if applicable)
-   - Unit tests: Mocha
-   - Integration tests: Chai
+## 3. Test Coverage: 80%
 
-5. Location:
-   - Define where to store the tests in the project directory.
-   - Recommended structure: create a top-level `test` directory that mirrors the `src` directory.
-   - Tests will be stored in a `test` directory mirroring the `src` directory.
+## 4. Test Directory Structure
 
-6. How to Run the Tests:
-   - List the commands needed to run the tests.
-   - These commands will be added to the `scripts` section of `package.json`.
-   - Command to run tests: npm test
+test/
+├── eventHandlers/           # Tests for each event handler
+├── helpers/                 # Utility functions for testing
+│   ├── makeContext.ts       # Creates mock GSContext
+│   └── makeEvent.ts         # Creates mock event payloads
+└── hooks/globalSetup.ts     # Setup code to run before all tests
+
+## 5. In Scope
+- **Event Handlers**:  
+  For each event handler, a corresponding test file will be created.  
+  - Source: `src/events` and `src/functions`
+  - Input for test generation:
+    - Summary in event file
+    - Comments in function code
+    - Actual code logic
+    - TRD descriptions (if available)
+    - Event schema definitions
+  - Test cases will include:
+    - Valid inputs
+    - Invalid inputs (missing/incorrect fields)
+    - Output structure matching response schema (status code-specific)
+    - Response validation using Ajv
+
+- The LLM should skip writing tests for event handlers if:
+  - No summary is found in both event file and TRD.
+  - These events should be listed in a `skippedTests` section at the end of this document.
+
+## 6. Out of Scope
+- Internal utility/helper functions
+- End-to-end flows involving frontend or full stack
+- Input schema validation (already enforced by Godspeed’s event schema)
+
+## 7. EventHandlers
+- registerUserToDB:
+      - Test successful user registration
+      - Test user registration failure due to database error
+
+## 8. Skipped Event Handlers
+- internalRegister: This event calls the registerUserToDB function, which is already tested.
+[...] (automatically updated)

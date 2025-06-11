@@ -46,8 +46,8 @@ file_size_limit: 50000      # set max file upload size in bytes (default is 50 m
 # authz: authz.check_user  # Reference a workflow inside the functions folder
 
 # Handling Validation Errors
-on_request_validation_error: validations.request.standardResponse
-on_response_validation_error: validations.response.standardResponse
+#on_request_validation_error: validations.request.standardResponse
+#on_response_validation_error: validations.response.standardResponse
 
 # Alternatively, define custom error handling logic inline
 # on_response_validation_error:
