@@ -1,7 +1,7 @@
 # Test Strategy Document
 
 ## 1. Objective
-Ensure core user registration and data persistence functionality is working correctly.
+Ensure the reliability of user registration by providing comprehensive test coverage for the `registerUserToDB` event handler.
 
 ## 2. Testing Framework: Mocha + Chai
 
@@ -19,7 +19,7 @@ test/
 ## 5. In Scope
 - **Event Handlers**:  
   For each event handler, a corresponding test file will be created.  
-  - Source: `src/events` and `src/functions`
+  - Source: `src/functions`
   - Input for test generation:
     - Summary in event file
     - Comments in function code
@@ -43,9 +43,17 @@ test/
 
 ## 7. EventHandlers
 - registerUserToDB:
-      - Test successful user registration
-      - Test user registration failure due to database error
+    - Should register a new user successfully with valid input.
+    - Should return an error if the email is already registered.
+    - Should handle database connection errors gracefully.
+    - Should validate input data against a schema.
 
 ## 8. Skipped Event Handlers
-- internalRegister: This event calls the registerUserToDB function, which is already tested.
 [...] (automatically updated)
+
+COMPLIANCE NOTES:
+- Never overwrite existing test files—append only.
+- Log skipped handlers with reasons.
+- Validate all responses using Ajv and match them against status-specific schemas.
+- Follow naming and folder conventions strictly.
+- Do not assume logic—derive it from code, summary, TRD, and schema only.

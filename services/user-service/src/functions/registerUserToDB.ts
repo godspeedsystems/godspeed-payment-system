@@ -33,13 +33,20 @@ export default async function registerUserToDB(ctx: GSContext, args: PlainObject
   }
 
   // Create the user if it doesnot exist in the database
-  const user = await prismaClient.user.create({
-    data: {
-      email,
-      passwordHash,
-      role,
-    },
-  });
+  let user;
+  try {
+    user = await prismaClient.user.create({
+      data: {
+        email,
+        passwordHash,
+        role,
+      },
+    });
+  } catch (error: any) {
+    return new GSStatus(false, 500, "Database connection error", {
+      error: error.message,
+    });
+  }
 
   return new GSStatus(true, 201, "User created successfully", {
     userId: user.id,
